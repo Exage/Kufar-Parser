@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Видеокарты | 5070",
+    "minPrice": 1000,
+    "maxPrice": -1,
+    "keywords": [],
+    "excludeKeywords": ["сломана", "ремонт", "артефакты", "запчасти"],
+    "categoryUrl": "https://www.kufar.by/l/videokarty/deshevo?ccvc=v.or%3A25"
+  },
+  {
+    "name": "Видеокарты | 5060",
+    "minPrice": 500,
+    "maxPrice": -1,
+    "keywords": [],
+    "excludeKeywords": ["сломана", "ремонт", "артефакты", "запчасти"],
+    "categoryUrl": "https://www.kufar.by/l/videokarty/deshevo?ccvc=v.or%3A23"
+  },
+  {
+    "name": "Видеокарты | 5060ti",
+    "minPrice": 700,
+    "maxPrice": -1,
+    "keywords": [],
+    "excludeKeywords": ["сломана", "ремонт", "артефакты", "запчасти"],
+    "categoryUrl": "https://www.kufar.by/l/videokarty/deshevo?ccvc=v.or%3A24"
+  },
+  {
+    "name": "Видеокарты | 9070xt",
+    "minPrice": 1200,
+    "maxPrice": -1,
+    "keywords": [],
+    "excludeKeywords": ["сломана", "ремонт", "артефакты", "запчасти"],
+    "categoryUrl": "https://www.kufar.by/l/videokarty?ccvc=v.or%3A39&sort=lst.d"
+  },
+  {
+    "name": "Видеокарты | 9070",
+    "minPrice": 700,
+    "maxPrice": -1,
+    "keywords": [],
+    "excludeKeywords": ["сломана", "ремонт", "артефакты", "запчасти"],
+    "categoryUrl": "https://www.kufar.by/l/videokarty?ccvc=v.or%3A38&sort=lst.d"
+  }
+]
