@@ -13,6 +13,7 @@ from config.settings import DATABASE_URL, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, 
 from database.db import get_session, init_db
 from database.models import Notification, Product
 from parser import parse_kufar_ads
+from parser.filters import passes_filters
 from telegram import send_product_notification
 from telegram.bot import send_message
 
@@ -28,33 +29,6 @@ logger = logging.getLogger(__name__)
 def load_rules(path: Path = CONFIG_PATH) -> List[Dict[str, Any]]:
     with path.open("r", encoding="utf-8") as file:
         return json.load(file)
-
-
-def passes_filters(item: Dict[str, Any], rule: Dict[str, Any]) -> bool:
-    title = (item.get("title") or "").lower()
-    price = item.get("price")
-
-    min_price = rule.get("minPrice", -1)
-    max_price = rule.get("maxPrice", -1)
-    keywords = [k.lower() for k in (rule.get("keywords") or [])]
-    exclude_keywords = [k.lower() for k in (rule.get("excludeKeywords") or [])]
-
-    # -1 означает "фильтр цены отключен".
-    if price is not None:
-        if min_price is not None and min_price >= 0 and price < min_price:
-            return False
-        if max_price is not None and max_price >= 0 and price > max_price:
-            return False
-
-    # Пустой массив keywords => фильтр по include-словам отключен.
-    if keywords and not any(word in title for word in keywords):
-        return False
-
-    # Пустой массив excludeKeywords => фильтр по exclude-словам отключен.
-    if exclude_keywords and any(word in title for word in exclude_keywords):
-        return False
-
-    return True
 
 
 def upsert_new_products(items: List[Dict[str, Any]], rule_name: str) -> List[Dict[str, Any]]:
@@ -73,11 +47,12 @@ def upsert_new_products(items: List[Dict[str, Any]], rule_name: str) -> List[Dic
         )
 
         for item in items:
-            if item["kufar_id"] in existing:
+            kufar_id = item["kufar_id"]
+            if kufar_id in existing:
                 continue
 
             product = Product(
-                kufar_id=item["kufar_id"],
+                kufar_id=kufar_id,
                 title=item.get("title") or "Без названия",
                 price=item.get("price"),
                 url=item["url"],
@@ -85,6 +60,7 @@ def upsert_new_products(items: List[Dict[str, Any]], rule_name: str) -> List[Dic
             )
             session.add(product)
             created_products.append(product)
+            existing.add(kufar_id)
 
         session.flush()
         created_data = [
@@ -138,9 +114,10 @@ def send_notifications_for_products(products: List[Dict[str, Any]]) -> int:
                     rule_name=product["rule_name"],
                 )
             )
+            session.commit()
+            notified_product_ids.add(product["id"])
             sent_count += 1
 
-        session.commit()
         return sent_count
     except Exception:
         session.rollback()
@@ -165,7 +142,7 @@ def run() -> None:
 
         try:
             logger.info("[%s] parsing: %s", name, url)
-            items = parse_kufar_ads(url)
+            items = parse_kufar_ads(url, max_pages=rule.get("maxPages"))
             filtered_items = [item for item in items if passes_filters(item, rule)]
             new_products = upsert_new_products(filtered_items, name)
             notified_count = send_notifications_for_products(new_products)

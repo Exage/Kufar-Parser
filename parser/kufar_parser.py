@@ -13,6 +13,15 @@ AD_TESTID = "kufar-ad"
 KUFAR_ID_RE = re.compile(r"/item/(\d+)")
 
 
+
+def _class_startswith(prefix: str):
+    return lambda class_name: bool(class_name and str(class_name).startswith(prefix))
+
+
+def _find_by_class_prefix(node: BeautifulSoup, tag: str, class_prefix: str):
+    return node.find(tag, class_=_class_startswith(class_prefix))
+
+
 def _clean_text(value: Optional[str]) -> str:
     if not value:
         return ""
@@ -20,13 +29,17 @@ def _clean_text(value: Optional[str]) -> str:
 
 
 def _extract_price(card: BeautifulSoup) -> Optional[float]:
-    price_block = card.select_one("div.styles_price_block__Ql9um")
+    price_block = _find_by_class_prefix(card, "div", "styles_price_block__")
     if not price_block:
         return None
 
     # Берем самую актуальную цену: сначала скидочную (если есть), иначе обычную.
-    preferred = price_block.select_one("span.styles_price__vIwzP")
-    fallback = price_block.select_one("p.styles_price__aVxZc span")
+    preferred = _find_by_class_prefix(price_block, "span", "styles_price__")
+    fallback = None
+    fallback_container = _find_by_class_prefix(price_block, "p", "styles_price__")
+    if fallback_container:
+        fallback = fallback_container.find("span")
+
     raw_price = _clean_text((preferred or fallback).get_text()) if (preferred or fallback) else ""
     if not raw_price:
         return None
@@ -60,9 +73,14 @@ def _parse_page(html: str, page_url: str) -> List[Dict]:
         if not kufar_id_match:
             continue
 
-        title = _clean_text(card.select_one("h3.styles_title__F3uIe").get_text() if card.select_one("h3.styles_title__F3uIe") else "")
-        location = _clean_text(card.select_one("p.styles_region__qCRbf").get_text() if card.select_one("p.styles_region__qCRbf") else "")
-        published_at = _clean_text(card.select_one("div.styles_secondary__MzdEb span").get_text() if card.select_one("div.styles_secondary__MzdEb span") else "")
+        title_node = _find_by_class_prefix(card, "h3", "styles_title__") or card.find("h3")
+        location_node = _find_by_class_prefix(card, "p", "styles_region__")
+        secondary_node = _find_by_class_prefix(card, "div", "styles_secondary__")
+        published_node = secondary_node.find("span") if secondary_node else None
+
+        title = _clean_text(title_node.get_text() if title_node else "")
+        location = _clean_text(location_node.get_text() if location_node else "")
+        published_at = _clean_text(published_node.get_text() if published_node else "")
         price = _extract_price(card)
 
         items.append(
