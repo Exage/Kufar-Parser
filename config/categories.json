@@ -94,5 +94,24 @@
       "9070 xt",
       "9070xt"
     ]
+  },
+    {
+    "name": "Видеокарты | 9060xt",
+    "minPrice": 500,
+    "maxPrice": -1,
+    "keywords": [],
+    "excludeKeywords": [
+      "сломана",
+      "ремонт",
+      "артефакты",
+      "запчасти"
+    ],
+    "categoryUrl": "https://www.kufar.by/l/komplektuyushchie-dlja-kompjutera/deshevo?ot=1&query=9060xt",
+    "titleKeywords": [
+      "9060xt",
+      "9060 xt"
+    ],
+    "titleExcludeKeywords": [
+    ]
   }
 ]
