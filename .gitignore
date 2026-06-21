@@ -1,3 +1,39 @@
-.venv
+# Virtual environment
+.venv/
+venv/
+
+# Environment variables
 .env
+.env.*
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local database
+*.db
+*.sqlite
+*.sqlite3
+
+# macOS
 .DS_Store
+
+# IDE / editors
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Test / tooling cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
